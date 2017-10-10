@@ -17,6 +17,8 @@ import com.ba.domain.customer.Customer;
 @RequestMapping("/bookings")
 public class BookingController {
 	
+	private static final String CUST_ENDPOINT_KEY = "CUSTOMER_SERVICE_EP";
+	
 	private static List<Booking> bookings = new ArrayList<Booking>();
 	
 	private static List<Product> firstBookingProducts  = new ArrayList<Product>();
@@ -46,7 +48,7 @@ public class BookingController {
 	@ResponseBody
 	public List<Booking> retrieveAllBookings() {
 		
-		//getCustomer();
+		getCustomer();
 		
 		getCustomerService();
 		
@@ -70,10 +72,12 @@ public class BookingController {
 	private List<Customer> getCustomerService() {
 		
 		List<Customer> cust = new ArrayList<Customer>();
-		cust = restTemplate.getForObject(
-				"http://customer.sb-ms-aw:8080/customers", ArrayList.class);
 		
-		System.out.println("DNS based Lookup response" + cust.toString());
+		System.out.println("Env Variable is " + System.getenv(CUST_ENDPOINT_KEY));
+		cust = restTemplate.getForObject(
+				"http://" + System.getenv(CUST_ENDPOINT_KEY) + "/customers", ArrayList.class);
+		
+		System.out.println("Namespace based Lookup response" + cust.toString());
 
 		return cust;
 	}
