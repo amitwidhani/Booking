@@ -2,31 +2,27 @@ package com.ba.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 import com.ba.domain.booking.Booking;
 import com.ba.domain.booking.Product;
-import com.ba.domain.customer.Customer;
 
 @RestController
 @RequestMapping("/bookings")
 public class BookingController {
-	
-	private static final String CUST_ENDPOINT_KEY = "CUSTOMER_SERVICE_EP";
 	
 	private static List<Booking> bookings = new ArrayList<Booking>();
 	
 	private static List<Product> firstBookingProducts  = new ArrayList<Product>();
 	
 	private static List<Product> secondBookingProducts = new ArrayList<Product>();
-	
-	private RestTemplate restTemplate;
-	
+		
 	static {
 		
 		firstBookingProducts.add(new Product("PNRREFA","LHR-BCN",130.0));
@@ -40,46 +36,16 @@ public class BookingController {
 		bookings.add(new Booking("2","Booking 2",secondBookingProducts, 290.0) );		
 	}
 	
-	public BookingController(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
-	
 	@RequestMapping( method = RequestMethod.GET)
 	@ResponseBody
-	public List<Booking> retrieveAllBookings() {
-		
-		getCustomer();
-		
-		getCustomerService();
-		
+	public List<Booking> retrieveAllBookings() {	
 		return bookings;
-	}
+	}	
 	
-	@SuppressWarnings("unchecked")
-	private List<Customer> getCustomer() {
-		
-		List<Customer> cust = new ArrayList<Customer>();
-		
-		cust = restTemplate.getForObject(
-				Utils.getCustomerEndpoint("/customers"), ArrayList.class);
-		
-		System.out.println("Environment variable based lookup response" + cust.toString());
-		
-		return cust;
+	@RequestMapping( method = RequestMethod.GET, value = "/{bookingId}")
+	@ResponseBody
+	public Booking retrieveBooking(@PathVariable long bookingId) {
+		Optional<Booking> booking = bookings.stream().filter(p -> p.getId().equalsIgnoreCase(String.valueOf(bookingId))).findFirst();
+		return booking.orElse(new Booking(String.valueOf(bookingId),null,null,0));
 	}
-	
-	@SuppressWarnings("unchecked")
-	private List<Customer> getCustomerService() {
-		
-		List<Customer> cust = new ArrayList<Customer>();
-		
-		System.out.println("Env Variable is " + System.getenv(CUST_ENDPOINT_KEY));
-		cust = restTemplate.getForObject(
-				"http://" + System.getenv(CUST_ENDPOINT_KEY) + "/customers", ArrayList.class);
-		
-		System.out.println("Namespace based Lookup response" + cust.toString());
-
-		return cust;
-	}
-
 }
