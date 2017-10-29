@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,6 +18,8 @@ import com.ba.domain.booking.Product;
 @RestController
 @RequestMapping("/bookings")
 public class BookingController {
+	
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private static List<Booking> bookings = new ArrayList<Booking>();
 	
@@ -39,12 +43,14 @@ public class BookingController {
 	@RequestMapping( method = RequestMethod.GET)
 	@ResponseBody
 	public List<Booking> retrieveAllBookings() {	
+		logger.info("Hello retrieveAllBookings");
 		return bookings;
 	}	
 	
 	@RequestMapping( method = RequestMethod.GET, value = "/{bookingId}")
 	@ResponseBody
 	public Booking retrieveBooking(@PathVariable long bookingId) {
+		logger.info("Hello retrieveBooking");
 		Optional<Booking> booking = bookings.stream().filter(p -> p.getId().equalsIgnoreCase(String.valueOf(bookingId))).findFirst();
 		return booking.orElse(new Booking(String.valueOf(bookingId),null,null,0));
 	}
